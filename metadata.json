@@ -1,0 +1,5 @@
+{
+  "name": "YM-Archive",
+  "description": "A hybrid Document Management System for tracking digital archives with OCR and physical warehouse locations.",
+  "requestFramePermissions": []
+}

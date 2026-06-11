@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  ym-archive:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ym-archive:latest
+    container_name: ym-archive-service
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - DATABASE_PATH=/app/data/archive.db
+      - JWT_SECRET=change_me_to_something_secure_and_random
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    volumes:
+      - ym-archive-data:/app/data
+      - ym-archive-uploads:/app/uploads
+
+volumes:
+  ym-archive-data:
+    driver: local
+  ym-archive-uploads:
+    driver: local
