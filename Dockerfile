@@ -55,4 +55,4 @@ RUN mkdir -p /app/data /app/uploads
 EXPOSE 3000
 
 # Start app using the node runner on the compiled server file
-CMD ["node", "dist/server.cjs"]
+CMD ["node", "dist/server.js"]
