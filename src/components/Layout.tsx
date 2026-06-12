@@ -33,15 +33,149 @@ export default function Layout({ children, activeTab, setActiveTab, userProfile,
   const canEdit = userProfile?.role === 'editor' || userProfile?.role === 'admin';
   const isAdmin = userProfile?.role === 'admin';
 
-  const themes = {
-    dashboard: { primary: 'indigo', accent: 'text-indigo-400', bg: 'bg-indigo-500', glow: 'shadow-indigo-500/30', border: 'border-indigo-500/30' },
-    digital: { primary: 'emerald', accent: 'text-emerald-400', bg: 'bg-emerald-500', glow: 'shadow-emerald-500/30', border: 'border-emerald-500/30' },
-    warehouse: { primary: 'amber', accent: 'text-amber-400', bg: 'bg-amber-500', glow: 'shadow-amber-500/30', border: 'border-amber-500/30' },
-    upload: { primary: 'indigo', accent: 'text-indigo-400', bg: 'bg-indigo-500', glow: 'shadow-indigo-500/30', border: 'border-indigo-500/30' },
-    admin: { primary: 'slate', accent: 'text-slate-400', bg: 'bg-slate-600', glow: 'shadow-slate-500/30', border: 'border-slate-500/30' },
+  const themeDefinitions: { [key: string]: { primary: string; accent: string; bg: string; glow: string; border: string; ambientBg: string; profileBg: string; profileIconBgBg: string; badgeBorder: string; badgeBg: string; fontColor: string; borderFocus: string; textAccent: string } } = {
+    indigo: { 
+      primary: 'indigo', 
+      accent: 'text-indigo-400', 
+      bg: 'bg-indigo-500', 
+      glow: 'shadow-indigo-500/30', 
+      border: 'border-indigo-500/30',
+      ambientBg: 'bg-indigo-500/30',
+      profileBg: 'bg-indigo-500/10 group-hover:bg-indigo-500/20',
+      profileIconBgBg: 'bg-indigo-600/20 group-hover:bg-indigo-600',
+      badgeBorder: 'border-indigo-400',
+      badgeBg: 'bg-indigo-500',
+      fontColor: 'text-indigo-500',
+      borderFocus: 'focus:border-indigo-500',
+      textAccent: 'group-focus-within:text-indigo-400'
+    },
+    emerald: { 
+      primary: 'emerald', 
+      accent: 'text-emerald-400', 
+      bg: 'bg-emerald-500', 
+      glow: 'shadow-emerald-500/30', 
+      border: 'border-emerald-500/30',
+      ambientBg: 'bg-emerald-500/30',
+      profileBg: 'bg-emerald-500/10 group-hover:bg-emerald-500/20',
+      profileIconBgBg: 'bg-emerald-600/20 group-hover:bg-emerald-600',
+      badgeBorder: 'border-emerald-400',
+      badgeBg: 'bg-emerald-500',
+      fontColor: 'text-emerald-500',
+      borderFocus: 'focus:border-emerald-500',
+      textAccent: 'group-focus-within:text-emerald-400'
+    },
+    amber: { 
+      primary: 'amber', 
+      accent: 'text-amber-400', 
+      bg: 'bg-amber-500', 
+      glow: 'shadow-amber-500/30', 
+      border: 'border-amber-500/30',
+      ambientBg: 'bg-amber-500/30',
+      profileBg: 'bg-amber-500/10 group-hover:bg-amber-500/20',
+      profileIconBgBg: 'bg-amber-600/20 group-hover:bg-amber-600',
+      badgeBorder: 'border-amber-400',
+      badgeBg: 'bg-amber-500',
+      fontColor: 'text-amber-500',
+      borderFocus: 'focus:border-amber-500',
+      textAccent: 'group-focus-within:text-amber-400'
+    },
+    purple: { 
+      primary: 'purple', 
+      accent: 'text-purple-400', 
+      bg: 'bg-purple-500', 
+      glow: 'shadow-purple-500/30', 
+      border: 'border-purple-500/30',
+      ambientBg: 'bg-purple-500/30',
+      profileBg: 'bg-purple-500/10 group-hover:bg-purple-500/20',
+      profileIconBgBg: 'bg-purple-600/20 group-hover:bg-purple-600',
+      badgeBorder: 'border-purple-400',
+      badgeBg: 'bg-purple-500',
+      fontColor: 'text-purple-500',
+      borderFocus: 'focus:border-purple-500',
+      textAccent: 'group-focus-within:text-purple-400'
+    },
+    rose: { 
+      primary: 'rose', 
+      accent: 'text-rose-400', 
+      bg: 'bg-rose-500', 
+      glow: 'shadow-rose-500/30', 
+      border: 'border-rose-500/30',
+      ambientBg: 'bg-rose-500/30',
+      profileBg: 'bg-rose-500/10 group-hover:bg-rose-500/20',
+      profileIconBgBg: 'bg-rose-600/20 group-hover:bg-rose-600',
+      badgeBorder: 'border-rose-400',
+      badgeBg: 'bg-rose-500',
+      fontColor: 'text-rose-500',
+      borderFocus: 'focus:border-rose-500',
+      textAccent: 'group-focus-within:text-rose-400'
+    },
+    slate: { 
+      primary: 'slate', 
+      accent: 'text-slate-400', 
+      bg: 'bg-slate-500', 
+      glow: 'shadow-slate-500/30', 
+      border: 'border-slate-500/30',
+      ambientBg: 'bg-slate-500/30',
+      profileBg: 'bg-slate-500/10 group-hover:bg-slate-500/20',
+      profileIconBgBg: 'bg-slate-600/20 group-hover:bg-slate-600',
+      badgeBorder: 'border-slate-400',
+      badgeBg: 'bg-slate-500',
+      fontColor: 'text-slate-500',
+      borderFocus: 'focus:border-slate-500',
+      textAccent: 'group-focus-within:text-slate-400'
+    },
   };
 
-  const currentTheme = themes[activeTab] || themes.dashboard;
+  const themes = {
+    dashboard: themeDefinitions.indigo,
+    digital: themeDefinitions.emerald,
+    warehouse: themeDefinitions.amber,
+    upload: themeDefinitions.indigo,
+    admin: themeDefinitions.slate,
+  };
+
+  const [selectedThemeColor, setSelectedThemeColor] = React.useState<string>(() => {
+    return localStorage.getItem('theme_color') || 'auto';
+  });
+
+  const [themeMode, setThemeMode] = React.useState<'light' | 'dark'>(() => {
+    return (localStorage.getItem('theme_mode') as 'light' | 'dark') || 'dark';
+  });
+
+  React.useEffect(() => {
+    if (themeMode === 'light') {
+      document.documentElement.classList.add('light-theme');
+    } else {
+      document.documentElement.classList.remove('light-theme');
+    }
+  }, [themeMode]);
+
+  const handleModeChange = (mode: 'light' | 'dark') => {
+    setThemeMode(mode);
+    localStorage.setItem('theme_mode', mode);
+  };
+
+  const availableColors = [
+    { id: 'auto', label: 'Auto (Dynamic)', bg: 'bg-gradient-to-tr from-indigo-500 via-emerald-500 to-amber-500' },
+    { id: 'indigo', label: 'Indigo', bg: 'bg-indigo-500' },
+    { id: 'emerald', label: 'Émeraude', bg: 'bg-emerald-500' },
+    { id: 'amber', label: 'Ambre', bg: 'bg-amber-500' },
+    { id: 'purple', label: 'Violet', bg: 'bg-purple-500' },
+    { id: 'rose', label: 'Rose', bg: 'bg-rose-500' },
+    { id: 'slate', label: 'Acier', bg: 'bg-slate-500' },
+  ];
+
+  const currentTheme = React.useMemo(() => {
+    if (selectedThemeColor === 'auto') {
+      return themes[activeTab] || themes.dashboard;
+    }
+    return themeDefinitions[selectedThemeColor] || themes.dashboard;
+  }, [selectedThemeColor, activeTab]);
+
+  const handleThemeChange = (colorId: string) => {
+    setSelectedThemeColor(colorId);
+    localStorage.setItem('theme_color', colorId);
+  };
 
   const menuItems = [
     { id: 'dashboard', label: 'Tableau de Bord', icon: LayoutDashboard, group: 'Principal' },
@@ -52,7 +186,10 @@ export default function Layout({ children, activeTab, setActiveTab, userProfile,
   ];
 
   return (
-    <div className="min-h-screen bg-[#02040a] text-slate-200 font-sans selection:bg-indigo-500/30 flex overflow-hidden relative">
+    <div className={cn(
+      "min-h-screen font-sans flex overflow-hidden relative w-full",
+      themeMode === 'light' ? "bg-slate-50 text-slate-800 selection:bg-indigo-500/10" : "bg-[#02040a] text-slate-200 selection:bg-indigo-500/30"
+    )}>
       {/* Dynamic Mesh Background - The "Wonderful Mixture" */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <motion.div 
@@ -64,7 +201,7 @@ export default function Layout({ children, activeTab, setActiveTab, userProfile,
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           className={cn(
             "absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full blur-[120px] transition-all duration-1000 opacity-20",
-            `bg-${currentTheme.primary}-500/30`
+            currentTheme.ambientBg
           )} 
         />
         <motion.div 
@@ -99,7 +236,7 @@ export default function Layout({ children, activeTab, setActiveTab, userProfile,
               />
             </div>
             <div>
-              <h1 className="font-black text-3xl tracking-tighter text-white leading-none">YM-<span className={`text-${currentTheme.primary}-500`}>Archive</span></h1>
+              <h1 className="font-black text-3xl tracking-tighter text-white leading-none">YM-<span className={currentTheme.fontColor}>Archive</span></h1>
               <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em] mt-2 font-mono">DMS ENTERPRISE</p>
             </div>
           </div>
@@ -174,15 +311,82 @@ export default function Layout({ children, activeTab, setActiveTab, userProfile,
           })}
         </div>
 
+        {/* Theme Switcher Console */}
+        <div className="px-8 mb-4">
+          <div className="p-5 bg-white/5 rounded-[2rem] border border-white/5 space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest font-mono">Thème Visuel</span>
+              <span className="text-[8px] font-black text-indigo-400 uppercase tracking-widest font-mono">
+                {availableColors.find(c => c.id === selectedThemeColor)?.label}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 justify-between">
+              {availableColors.map(color => (
+                <button
+                  key={color.id}
+                  onClick={() => handleThemeChange(color.id)}
+                  title={color.label}
+                  className={cn(
+                    "w-6 h-6 rounded-full border transition-all duration-300 relative hover:scale-110",
+                    selectedThemeColor === color.id 
+                      ? "border-white scale-105 ring-2 ring-indigo-500/20" 
+                      : "border-transparent opacity-60 hover:opacity-100"
+                  )}
+                >
+                  <span className={cn("absolute inset-0.5 rounded-full block", color.bg)} />
+                </button>
+              ))}
+            </div>
+
+            {/* Mode Toggle (Windows-style Light vs Dark) */}
+            <div className="pt-3 border-t border-white/5 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest font-mono">CONTRASTE (WINDOWS)</span>
+                <span className="text-[8px] font-black text-indigo-400 uppercase tracking-widest font-mono">
+                  {themeMode === 'light' ? 'Clair' : 'Sombre'}
+                </span>
+              </div>
+              <div className="flex bg-black/10 p-1 rounded-xl border border-white/5 w-full">
+                <button
+                  onClick={() => handleModeChange('dark')}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all duration-300",
+                    themeMode === 'dark' 
+                      ? "bg-white text-slate-900 shadow-sm font-bold scale-102" 
+                      : "text-slate-400 hover:text-white"
+                  )}
+                  title="Mode Sombre (Dark)"
+                >
+                  <span>🌙</span>
+                  <span className="text-[9px] font-black uppercase tracking-wider">Sombre</span>
+                </button>
+                <button
+                  onClick={() => handleModeChange('light')}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all duration-300",
+                    themeMode === 'light' 
+                      ? "bg-white text-slate-900 shadow-sm font-bold scale-102" 
+                      : "text-slate-400 hover:text-white"
+                  )}
+                  title="Mode Clair (Light)"
+                >
+                  <span>☀️</span>
+                  <span className="text-[9px] font-black uppercase tracking-wider">Clair</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* User Profile - Premium Card */}
         <div className="p-8">
           <div className="p-8 bg-white/5 backdrop-blur-3xl rounded-[3rem] relative overflow-hidden group border border-white/5 transition-all duration-700 hover:border-white/10">
-            <div className={cn("absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 blur-3xl transition-all duration-700", `bg-${currentTheme.primary}-500/10 group-hover:bg-${currentTheme.primary}-500/20`)} />
+            <div className={cn("absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 blur-3xl transition-all duration-700", currentTheme.profileBg)} />
             
             <div className="flex items-center gap-5 mb-8 relative z-10">
               <div className={cn(
                 "w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black text-white border border-white/10 transition-all duration-700",
-                `bg-${currentTheme.primary}-600/20 group-hover:bg-${currentTheme.primary}-600`
+                currentTheme.profileIconBgBg
               )}>
                 {userProfile?.username.charAt(0).toUpperCase()}
               </div>
@@ -196,7 +400,7 @@ export default function Layout({ children, activeTab, setActiveTab, userProfile,
               <span className={cn(
                 "px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border shadow-sm",
                 userProfile?.role === 'admin' ? "bg-white text-slate-900 border-white" :
-                userProfile?.role === 'editor' ? `bg-${currentTheme.primary}-500 text-white border-${currentTheme.primary}-400` :
+                userProfile?.role === 'editor' ? cn("text-white", currentTheme.badgeBg, currentTheme.badgeBorder) :
                 "bg-white/10 text-slate-300 border-white/10"
               )}>
                 {userProfile?.role === 'admin' ? 'ADMINISTRATEUR' : userProfile?.role === 'editor' ? 'ÉDITEUR' : 'LECTEUR'}
@@ -237,10 +441,10 @@ export default function Layout({ children, activeTab, setActiveTab, userProfile,
                 placeholder="Recherche globale..." 
                 className={cn(
                   "pl-12 pr-6 py-3 bg-white/5 border border-white/5 rounded-2xl transition-all outline-none text-xs font-bold w-64 shadow-inner text-white placeholder:text-slate-600",
-                  `focus:border-${currentTheme.primary}-500 focus:bg-white/10`
+                  currentTheme.borderFocus, "focus:bg-white/10"
                 )}
               />
-              <Search className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600 group-focus-within:text-white", `group-focus-within:text-${currentTheme.primary}-400`)} />
+              <Search className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600 group-focus-within:text-white", currentTheme.textAccent)} />
             </div>
             <button className="p-3 text-slate-500 hover:text-white transition-colors relative bg-white/5 rounded-2xl border border-white/5">
               <Bell className="w-5 h-5" />

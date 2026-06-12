@@ -135,10 +135,10 @@ function AppContent() {
         <Dashboard documents={documents} />
       )}
       {activeTab === 'digital' && (
-        <SearchPortal documents={documents} onDelete={handleDelete} onUpdate={fetchDocuments} mode="digital" />
+        <SearchPortal documents={documents} onDelete={handleDelete} onUpdate={fetchDocuments} mode="digital" userProfile={userProfile} />
       )}
       {activeTab === 'warehouse' && (
-        <SearchPortal documents={documents} onDelete={handleDelete} onUpdate={fetchDocuments} mode="warehouse" />
+        <SearchPortal documents={documents} onDelete={handleDelete} onUpdate={fetchDocuments} mode="warehouse" userProfile={userProfile} />
       )}
       {activeTab === 'upload' && (
         <UploadForm onUpload={handleUpload} />

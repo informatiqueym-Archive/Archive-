@@ -47,14 +47,16 @@ export default function SearchPortal({ documents, onDelete, onUpdate, mode = 'di
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [f, d, c] = await Promise.all([getFolders(), getDepartments(), getCategories()]);
+        const [f, d, c, m] = await Promise.all([
+          getFolders(),
+          getDepartments(),
+          getCategories(),
+          getMonitoringStats(mode)
+        ]);
         setFolders(f.filter(folder => folder.type === mode));
         setDepartments(d);
         setCategories(c);
-        if (mode === 'digital') {
-          const m = await getMonitoringStats();
-          setMonitoring(m);
-        }
+        setMonitoring(m);
       } catch (err) {
         console.error('Erreur chargement données:', err);
       }
@@ -252,18 +254,23 @@ export default function SearchPortal({ documents, onDelete, onUpdate, mode = 'di
       </div>
 
       {/* Monitoring Dashboard - Technical Widget */}
-      {mode === 'digital' && monitoring && (
+      {monitoring && (
         <div className="bg-slate-900/40 rounded-[3.5rem] p-12 text-white relative overflow-hidden shadow-2xl border border-white/5 backdrop-blur-xl">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full -mr-48 -mt-48 blur-[120px]" />
+          <div className={cn(
+            "absolute top-0 right-0 w-96 h-96 rounded-full -mr-48 -mt-48 blur-[120px] opacity-30",
+            mode === 'digital' ? "bg-emerald-500/30" : "bg-amber-500/30"
+          )} />
           
           <div className="relative z-10">
             <div className="flex items-center gap-4 mb-12">
               <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-xl border border-white/10">
-                <Activity className="w-6 h-6 text-indigo-400" />
+                <Activity className={cn("w-6 h-6", mode === 'digital' ? "text-emerald-400" : "text-amber-400")} />
               </div>
               <div>
-                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] font-mono">Surveillance Temps Réel</p>
-                <h3 className="text-2xl font-black tracking-tight">Statistiques de Répartition d'Accès</h3>
+                <p className={cn("text-[10px] font-black uppercase tracking-[0.3em] font-mono", mode === 'digital' ? "text-emerald-400" : "text-amber-400")}>
+                  {mode === 'digital' ? "Surveillance Flux Numérique" : "Suivi Logistique Physique"}
+                </p>
+                <h3 className="text-2xl font-black tracking-tight">Statistiques de Répartition</h3>
               </div>
             </div>
 
@@ -271,7 +278,7 @@ export default function SearchPortal({ documents, onDelete, onUpdate, mode = 'di
               <div className="space-y-3">
                 <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.2em] font-mono">Volume Total Accessible</p>
                 <p className="text-6xl font-black tracking-tighter tabular-nums">{monitoring.total}</p>
-                <div className="h-1 w-12 bg-indigo-500 rounded-full" />
+                <div className={cn("h-1 w-12 rounded-full", mode === 'digital' ? "bg-emerald-500" : "bg-amber-500")} />
               </div>
               {monitoring.departments.map(dept => {
                 // If not admin, hide departments which are not authorized
@@ -282,8 +289,8 @@ export default function SearchPortal({ documents, onDelete, onUpdate, mode = 'di
                   <div key={dept.department} className="space-y-3 border-l border-white/5 pl-10 animate-in fade-in">
                     <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.2em] font-mono truncate">{dept.department}</p>
                     <p className="text-4xl font-black tracking-tighter tabular-nums">{dept.count}</p>
-                    <div className="flex items-center gap-2 text-[9px] font-black text-emerald-400 font-mono">
-                      <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                    <div className={cn("flex items-center gap-2 text-[9px] font-black font-mono", mode === 'digital' ? "text-emerald-400" : "text-amber-400")}>
+                      <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse", mode === 'digital' ? "bg-emerald-500" : "bg-amber-500")} />
                       AUTORISÉ
                     </div>
                   </div>

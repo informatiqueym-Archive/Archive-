@@ -515,12 +515,28 @@ async function startServer() {
 
   // Monitoring Stats
   app.get("/api/monitoring", authenticate, (req: any, res) => {
+    const { mode } = req.query;
+    let joinCondition = "";
+    if (mode === "digital") {
+      joinCondition = "AND (doc.status IS NULL OR doc.status != 'Archived')";
+    } else if (mode === "warehouse") {
+      joinCondition = "AND doc.status = 'Archived'";
+    }
+
     let stats = db.prepare(`
-      SELECT department, COUNT(*) as count 
-      FROM documents 
-      GROUP BY department
+      SELECT d.name as department, COUNT(doc.id) as count 
+      FROM departments d
+      LEFT JOIN documents doc ON d.name = doc.department ${joinCondition}
+      GROUP BY d.name
     `).all() as any[];
-    const totalCountRow = db.prepare("SELECT COUNT(*) as count FROM documents").get() as { count: number };
+
+    let totalQuery = "SELECT COUNT(*) as count FROM documents";
+    if (mode === "digital") {
+      totalQuery += " WHERE status IS NULL OR status != 'Archived'";
+    } else if (mode === "warehouse") {
+      totalQuery += " WHERE status = 'Archived'";
+    }
+    const totalCountRow = db.prepare(totalQuery).get() as { count: number };
     let total = Number(totalCountRow?.count || 0);
 
     if (req.user.role !== 'admin') {

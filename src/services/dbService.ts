@@ -68,8 +68,9 @@ export async function createFolder(folder: { name: string; parentPath?: string; 
 }
 
 // Monitoring
-export async function getMonitoringStats(): Promise<{ departments: { department: string; count: number }[]; total: number }> {
-  const res = await fetch('/api/monitoring');
+export async function getMonitoringStats(mode?: string): Promise<{ departments: { department: string; count: number }[]; total: number }> {
+  const url = mode ? `/api/monitoring?mode=${mode}` : '/api/monitoring';
+  const res = await fetch(url);
   if (!res.ok) throw new Error('Failed to fetch monitoring stats');
   return res.json();
 }
