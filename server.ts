@@ -93,6 +93,9 @@ db.exec(`
 
 // Migration for existing tables
 try {
+  db.prepare("ALTER TABLE users ADD COLUMN departments TEXT").run();
+} catch (e) {}
+try {
   db.exec("ALTER TABLE folders ADD COLUMN trackingCode TEXT UNIQUE");
 } catch (e) {}
 try {
@@ -412,9 +415,10 @@ async function startServer() {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: user.id, username: user.username, role: user.role, department: user.department }, JWT_SECRET, { expiresIn: "24h" });
+    const departmentsVal = user.departments || user.department || "Général";
+    const token = jwt.sign({ id: user.id, username: user.username, role: user.role, department: user.department, departments: departmentsVal }, JWT_SECRET, { expiresIn: "24h" });
     res.cookie("token", token, { httpOnly: true, sameSite: "strict" });
-    res.json({ id: user.id, username: user.username, role: user.role, department: user.department });
+    res.json({ id: user.id, username: user.username, role: user.role, department: user.department, departments: departmentsVal });
   });
 
   app.post("/api/auth/logout", (req, res) => {
@@ -428,18 +432,25 @@ async function startServer() {
 
   // User Management (Admin Only)
   app.get("/api/users", authenticate, authorize(["admin"]), (req, res) => {
-    const users = db.prepare("SELECT id, username, role, createdAt FROM users").all();
+    const users = db.prepare("SELECT id, username, role, department, departments, createdAt FROM users").all();
     res.json(users);
   });
 
   app.post("/api/users", authenticate, authorize(["admin"]), (req, res) => {
-    const { username, password, role } = req.body;
+    const { username, password, role, department, departments } = req.body;
     try {
       const hashedPassword = bcrypt.hashSync(password, 10);
-      db.prepare("INSERT INTO users (username, password, role) VALUES (?, ?, ?)").run(username, hashedPassword, role);
+      db.prepare("INSERT INTO users (username, password, role, department, departments) VALUES (?, ?, ?, ?, ?)").run(
+        username, 
+        hashedPassword, 
+        role, 
+        department || "Général", 
+        departments || department || "Général"
+      );
       res.status(201).json({ success: true });
     } catch (err) {
-      res.status(400).json({ error: "Username already exists" });
+      console.error("Failed to create user:", err);
+      res.status(400).json({ error: "Username already exists or SQL error" });
     }
   });
 
@@ -503,25 +514,49 @@ async function startServer() {
   });
 
   // Monitoring Stats
-  app.get("/api/monitoring", authenticate, (req, res) => {
-    const stats = db.prepare(`
+  app.get("/api/monitoring", authenticate, (req: any, res) => {
+    let stats = db.prepare(`
       SELECT department, COUNT(*) as count 
       FROM documents 
       GROUP BY department
-    `).all();
-    const total = db.prepare("SELECT COUNT(*) as count FROM documents").get() as { count: number };
-    res.json({ departments: stats, total: total.count });
+    `).all() as any[];
+    const totalCountRow = db.prepare("SELECT COUNT(*) as count FROM documents").get() as { count: number };
+    let total = Number(totalCountRow?.count || 0);
+
+    if (req.user.role !== 'admin') {
+      const userFromDb: any = db.prepare("SELECT department, departments FROM users WHERE id = ?").get(req.user.id);
+      const allowedDepts = (userFromDb?.departments || userFromDb?.department || req.user.departments || req.user.department || "Général")
+        .split(',')
+        .map((s: string) => s.trim())
+        .filter(Boolean);
+
+      stats = stats.filter((stat: any) => allowedDepts.includes(stat.department));
+      total = stats.reduce((acc: number, item: any) => acc + Number(item.count), 0) as number;
+    }
+    res.json({ departments: stats, total });
   });
 
   // Document Endpoints
-  app.get("/api/documents", authenticate, (req, res) => {
+  app.get("/api/documents", authenticate, (req: any, res) => {
     const docs = db.prepare(`
       SELECT d.*, u.username as authorName, f.name as folderName
       FROM documents d 
       JOIN users u ON d.authorId = u.id
       LEFT JOIN folders f ON d.folderId = f.id
     `).all();
-    res.json(docs.map((d: any) => ({
+
+    let filteredDocs = docs;
+    if (req.user.role !== 'admin') {
+      const userFromDb: any = db.prepare("SELECT department, departments FROM users WHERE id = ?").get(req.user.id);
+      const allowedDepts = (userFromDb?.departments || userFromDb?.department || req.user.departments || req.user.department || "Général")
+        .split(',')
+        .map((s: string) => s.trim())
+        .filter(Boolean);
+
+      filteredDocs = docs.filter((d: any) => allowedDepts.includes(d.department));
+    }
+
+    res.json(filteredDocs.map((d: any) => ({
       id: d.id,
       filename: d.filename,
       trackingCode: d.trackingCode,

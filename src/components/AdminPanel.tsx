@@ -26,7 +26,7 @@ export default function AdminPanel() {
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newRole, setNewRole] = useState<UserRole>('viewer');
-  const [newDept, setNewDept] = useState('Général');
+  const [selectedDepts, setSelectedDepts] = useState<string[]>(['Général']);
   
   // Folder Form State
   const [newFolderName, setNewFolderName] = useState('');
@@ -72,12 +72,14 @@ export default function AdminPanel() {
         username: newUsername,
         password: newPassword,
         role: newRole,
-        department: newDept
+        department: selectedDepts[0] || 'Général',
+        departments: selectedDepts.join(',')
       });
 
       setSuccess(`Utilisateur "${newUsername}" créé avec succès.`);
       setNewUsername('');
       setNewPassword('');
+      setSelectedDepts(['Général']);
       fetchData();
     } catch (err: any) {
       setError(err.message || 'Échec de la création de l\'utilisateur.');
@@ -196,31 +198,42 @@ export default function AdminPanel() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1 font-mono">Dépt</label>
-                  <select
-                    value={newDept}
-                    onChange={(e) => setNewDept(e.target.value)}
-                    className="w-full px-4 py-4 bg-white/5 border-2 border-transparent focus:border-indigo-500/50 focus:bg-white/10 rounded-2xl transition-all outline-none text-xs font-black uppercase tracking-tight shadow-inner appearance-none text-white"
-                  >
-                    {departments.map(d => (
-                      <option key={d.id} value={d.name} className="bg-slate-900">{d.name}</option>
-                    ))}
-                  </select>
+              <div className="space-y-4">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1 font-mono block">DÉPARTEMENTS ACCÈS (UN OU PLUSIEURS)</label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-5 bg-white/5 rounded-2xl border border-white/5 max-h-40 overflow-y-auto custom-scrollbar">
+                  {departments.map(d => (
+                    <label key={d.id} className="flex items-center gap-3 cursor-pointer text-[10px] font-black text-slate-300 hover:text-white select-none">
+                      <input
+                        type="checkbox"
+                        checked={selectedDepts.includes(d.name)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedDepts([...selectedDepts, d.name]);
+                          } else {
+                            if (selectedDepts.length > 1) {
+                              setSelectedDepts(selectedDepts.filter(name => name !== d.name));
+                            }
+                          }
+                        }}
+                        className="rounded border-white/10 text-indigo-600 focus:ring-indigo-500/30 bg-slate-900 w-4 h-4 cursor-pointer"
+                      />
+                      <span className="uppercase tracking-wide truncate">{d.name}</span>
+                    </label>
+                  ))}
                 </div>
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1 font-mono">Niveau</label>
-                  <select
-                    value={newRole}
-                    onChange={(e) => setNewRole(e.target.value as UserRole)}
-                    className="w-full px-4 py-4 bg-white/5 border-2 border-transparent focus:border-indigo-500/50 focus:bg-white/10 rounded-2xl transition-all outline-none text-xs font-black uppercase tracking-tight shadow-inner appearance-none text-white"
-                  >
-                    <option value="viewer" className="bg-slate-900">LECTEUR</option>
-                    <option value="editor" className="bg-slate-900">ÉDITEUR</option>
-                    <option value="admin" className="bg-slate-900">ADMIN</option>
-                  </select>
-                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1 font-mono block">NIVEAU D'ACCRÉDITATION</label>
+                <select
+                  value={newRole}
+                  onChange={(e) => setNewRole(e.target.value as UserRole)}
+                  className="w-full px-5 py-4 bg-white/5 border-2 border-transparent focus:border-indigo-500/50 focus:bg-white/10 rounded-2xl transition-all outline-none text-xs font-black uppercase tracking-tight shadow-inner appearance-none text-white font-mono"
+                >
+                  <option value="viewer" className="bg-slate-900">LECTEUR (VIEWER)</option>
+                  <option value="editor" className="bg-slate-900">ÉDITEUR (EDITOR)</option>
+                  <option value="admin" className="bg-slate-900">ADMINISTRATEUR (ADMIN)</option>
+                </select>
               </div>
 
               <button
@@ -447,9 +460,13 @@ export default function AdminPanel() {
                         </div>
                       </td>
                       <td className="px-12 py-8">
-                        <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-5 py-2 rounded-full border border-indigo-500/20 shadow-sm font-mono">
-                          {user.department}
-                        </span>
+                        <div className="flex flex-wrap gap-2">
+                          {(user.departments || user.department || 'Général').split(',').map((dept, idx) => (
+                            <span key={idx} className="text-[9px] font-black text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/20 shadow-sm font-mono">
+                              {dept}
+                            </span>
+                          ))}
+                        </div>
                       </td>
                       <td className="px-12 py-8">
                         <div className="flex items-center gap-3">

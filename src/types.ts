@@ -43,5 +43,6 @@ export interface ArchiveUser {
   username: string;
   role: UserRole;
   department: string;
+  departments?: string;
   createdAt: string;
 }
